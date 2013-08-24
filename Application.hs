@@ -23,6 +23,9 @@ import System.Log.FastLogger (mkLogger)
 -- Don't forget to add new modules to your cabal file!
 import Handler.Home
 
+-- Helper to parse Postgres environment variable
+import Helpers.Heroku
+
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
 -- comments there for more details.
@@ -55,9 +58,14 @@ makeFoundation :: AppConfig DefaultEnv Extra -> IO App
 makeFoundation conf = do
     manager <- newManager def
     s <- staticSite
-    dbconf <- withYamlEnvironment "config/postgresql.yml" (appEnv conf)
-              Database.Persist.loadConfig >>=
-              Database.Persist.applyEnv
+    dbconf <- if development
+        -- default behavior when in development
+        then withYamlEnvironment "config/postgresql.yml" (appEnv conf)
+            Database.Persist.loadConfig >>=
+            Database.Persist.applyEnv
+        -- but parse DATABASE_URL in non-development
+        else herokuConf
+
     p <- Database.Persist.createPoolConfig (dbconf :: Settings.PersistConf)
     logger <- mkLogger True stdout
     let foundation = App conf s p manager dbconf logger

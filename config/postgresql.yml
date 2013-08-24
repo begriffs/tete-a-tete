@@ -1,24 +1,19 @@
 Default: &defaults
-  user: tete-a-tete
-  password: tete-a-tete
+  user: tete
+  password: tete
   host: localhost
   port: 5432
-  database: tete-a-tete
+  database: tete
   poolsize: 10
 
 Development:
   <<: *defaults
 
 Testing:
-  database: tete-a-tete_test
+  database: tete_test
   <<: *defaults
 
 Staging:
-  database: tete-a-tete_staging
-  poolsize: 100
-  <<: *defaults
-
-Production:
-  database: tete-a-tete_production
+  database: tete_staging
   poolsize: 100
   <<: *defaults
